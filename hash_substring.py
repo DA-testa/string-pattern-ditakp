@@ -1,32 +1,47 @@
-# python3
-
 def read_input():
-    # this function needs to aquire input both from keyboard and file
-    # as before, use capital i (input from keyboard) and capital f (input from file) to choose which input type will follow
     
-    
-    # after input type choice
-    # read two lines 
-    # first line is pattern 
-    # second line is text in which to look for pattern 
-    
-    # return both lines in one return
-    
-    # this is the sample return, notice the rstrip function
-    return (input().rstrip(), input().rstrip())
+    input_type = input()
+    if input_type == "F":
+        with open("tests/sample1.in") as file:
+            pattern = file.readline().rstrip()
+            text = file.readline().rstrip()
+    else:
+        pattern = input().rstrip()
+        text = input().rstrip()
+    return pattern, text
+
 
 def print_occurrences(output):
-    # this function should control output, it doesn't need any return
     print(' '.join(map(str, output)))
 
+
 def get_occurrences(pattern, text):
-    # this function should find the occurances using Rabin Karp alghoritm 
+    p = 31  
+    m = 10**9 + 9  
+    pattern_hash = 0
+    len_pattern = len(pattern)
+    len_text = len(text)
+    power_p = [1] * (len_text - len_pattern + 1)
+    text_hash = [0] * (len_text - len_pattern + 1)
 
-    # and return an iterable variable
-    return [0]
+    for i in range(1, len(power_p)):
+        power_p[i] = (power_p[i - 1] * p) % m
+    for i in range(len_pattern):
+        pattern_hash = (pattern_hash * p + ord(pattern[i])) % m
+    for i in range(len_text - len_pattern + 1):
+        if i == 0:
+            for j in range(len_pattern):
+                text_hash[i] = (text_hash[i] * p + ord(text[i + j])) % m
+        else:
+            text_hash[i] = (p * (text_hash[i - 1] - ord(text[i - 1]) * power_p[len_pattern - 1]) +
+                            ord(text[i + len_pattern - 1])) % m
+        if pattern_hash == text_hash[i]:
+            if pattern == text[i:i + len_pattern]:
+                yield i
+
+    return []
 
 
-# this part launches the functions
+
 if __name__ == '__main__':
-    print_occurrences(get_occurrences(*read_input()))
-
+    print_occurrences(list(get_occurrences(*read_input())))
